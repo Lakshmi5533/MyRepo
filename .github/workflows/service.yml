@@ -15,7 +15,7 @@ jobs:
        # uses: actions/checkout@v3
       - name: Download GitLab repository
         run: |
-         Invoke-WebRequest -Uri "https://gitlab.com/pedavalli.sreelakshmi89/parallel_execution/-/archive/main/parallel_execution-main.zip" -OutFile "parallel_execution-main.zip"
+         Invoke-WebRequest -Uri "https://git.baplc.com/ndc/ndc-automation-framework/-/archive/main/ndc-automation-framework-main.zip" -OutFile "ndc-automation-framework-main.zip"
          Expand-Archive -Path "parallel_execution-main.zip" -DestinationPath "."
       - uses: actions/setup-java@v3
         with:
@@ -81,7 +81,7 @@ jobs:
 #         uses: actions/checkout@v3
       - name: Download GitLab repository
         run: |
-         Invoke-WebRequest -Uri "https://gitlab.com/pedavalli.sreelakshmi89/parallel_execution/-/archive/main/parallel_execution-main.zip" -OutFile "parallel_execution-main.zip"
+         Invoke-WebRequest -Uri "https://git.baplc.com/ndc/ndc-automation-framework/-/archive/main/ndc-automation-framework-main.zip" -OutFile "ndc-automation-framework-main.zip"
          Expand-Archive -Path "parallel_execution-main.zip" -DestinationPath "."
       - uses: actions/setup-java@v3
         with:
