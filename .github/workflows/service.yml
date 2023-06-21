@@ -1,0 +1,131 @@
+name: github actions
+#on: [push]
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  Agent1:
+    runs-on: 
+      - GithubRunner1
+    steps:
+      #- name: Checkout code
+       # uses: actions/checkout@v3
+      - name: Download GitLab repository
+        run: |
+         Invoke-WebRequest -Uri "https://gitlab.com/pedavalli.sreelakshmi89/parallel_execution/-/archive/main/parallel_execution-main.zip" -OutFile "parallel_execution-main.zip"
+         Expand-Archive -Path "parallel_execution-main.zip" -DestinationPath "."
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '11'        
+          java-package: jdk
+          server-id: github
+          jdkFile: C:\Program Files\Java\jdk-1.8
+      - name: Install Maven
+  # You may pin to the exact commit or the version.
+  # uses: yuzhiyongcn/setup-maven@0c5810c65a0fb6c88b6089724cc47370cf4eaffc
+        uses: yuzhiyongcn/setup-maven@v1.0.0
+        with:
+    # Version Spec of the version to use.  Examples: 10.x, 10.15.1, >=10.15.0
+          maven-version: 3.8.2
+      - name: Execute tests
+        run: |
+             cd parallel_execution-main
+             java -jar cucumber-tc-execution-engine-1.0.jar GithubRunner1 --spring.config.location=application10.properties
+      - name: Merge reports
+        run: |
+             cd parallel_execution-main
+             java -jar merge-cucumber-jar.jar  C:\\actions-runner\\_work\\GithubActionDemo\\GithubActionDemo\\parallel_execution-main\\target\\cucumber-reports GithubRunner1
+
+      - name: Move JSON file to Directory
+        id: move_file
+        run: |
+          xcopy C:\actions-runner\_work\GithubActionDemo\GithubActionDemo\parallel_execution-main\target\cucumber-reports\GithubRunner1_report.json C:\actions-runner\_work\GithubActionDemo\GithubActionDemo\parallel_execution-main\jsonmergereport\ /Y
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+           name: jsonartifacts
+           path: C:\actions-runner\_work\GithubActionDemo\GithubActionDemo\parallel_execution-main\jsonmergereport
+
+
+ 
+
+#          - name: Send JSON report via email
+#            if: always()
+#            uses: dawidd6/action-send-mail@v3
+#            with:
+#              server_address: smtp.office365.com
+#              server_port: 587
+#              username: 
+#              password: 
+#              subject: JSON Report
+#              body: |
+#                Please find attached the JSON report for the latest test run.
+#              from: arunteja.devabhaktuni@cigniti.com
+#              to: bharat.nakka@cigniti.com
+#              attachments: |
+#                            C:\actions-runner\_work\GithubActionDemo\parallel_execution-main\democalculator\target\cucumber-reports\agent.json
+
+ 
+
+                    
+  Agent2:
+    runs-on: 
+      - GithubRunner2
+    steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+      - name: Download GitLab repository
+        run: |
+         Invoke-WebRequest -Uri "https://gitlab.com/pedavalli.sreelakshmi89/parallel_execution/-/archive/main/parallel_execution-main.zip" -OutFile "parallel_execution-main.zip"
+         Expand-Archive -Path "parallel_execution-main.zip" -DestinationPath "."
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '11'        
+          java-package: jdk
+          server-id: github
+          jdkFile: C:\Program Files\Java\jdk-1.8
+      - name: Install Maven
+  # You may pin to the exact commit or the version.
+  # uses: yuzhiyongcn/setup-maven@0c5810c65a0fb6c88b6089724cc47370cf4eaffc
+        uses: yuzhiyongcn/setup-maven@v1.0.0
+        with:
+    # Version Spec of the version to use.  Examples: 10.x, 10.15.1, >=10.15.0
+          maven-version: 3.8.2
+      - name: Execute tests
+        run: |
+             cd parallel_execution-main
+             java -jar cucumber-tc-execution-engine-1.0.jar GithubRunner2 --spring.config.location=application2.properties
+      - name: Merge reports
+        run: |
+             cd parallel_execution-main
+             java -jar merge-cucumber-jar.jar  C:\\actions-runner\\_work\\GithubActionDemo\\GithubActionDemo\\parallel_execution-main\\target\\cucumber-reports GithubRunner2
+      - name: Move JSON file to Directory
+        id: move_file
+        run: |
+           xcopy C:\actions-runner\_work\GithubActionDemo\GithubActionDemo\parallel_execution-main\target\cucumber-reports\GithubRunner2_report.json C:\actions-runner\_work\GithubActionDemo\GithubActionDemo\parallel_execution-main\jsonmergereport\ /Y
+
+ 
+
+      - name: commit json files
+        uses: actions/upload-artifact@v1
+        with:
+             name: jsonartifacts
+             path: C:\actions-runner\_work\GithubActionDemo\GithubActionDemo\parallel_execution-main\jsonmergereport
+
+  Agent1_2:
+    needs: [Agent1, Agent2]
+    runs-on: 
+       - GithubRunner1
+    steps:
+       - name: Download a Build Artifact
+         uses: actions/download-artifact@v2.1.1
+       - name: Merge reports
+         run: |
+             cd parallel_execution-main
+             java -jar merge-cucumber-jar.jar C:\\actions-runner\\_work\\GithubActionDemo\\GithubActionDemo\\jsonartifacts finalreport
